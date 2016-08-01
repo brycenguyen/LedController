@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity"
+    android:id="@+id/btnTimeSetting"
+    android:stretchColumns="3"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Please pick the color..."
+        android:id="@+id/textView"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:scrollbars="none"
+        android:layout_weight="1"
+        android:id="@+id/scrollView"
+        android:fillViewport="false">
+
+        <TableLayout
+            android:layout_width="fill_parent"
+            android:id="@+id/table_layout"
+            android:layout_height="fill_parent">
+
+
+        </TableLayout>
+    </ScrollView>
+
+    <TableRow>
+
+        <RadioGroup
+            android:orientation="vertical">
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New RadioButton"
+                android:id="@+id/radioButton2"
+                android:layout_alignParentRight="true"/>
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New RadioButton"
+                android:id="@+id/radioButton"
+                android:checked="false" />
+
+        </RadioGroup>
+
+
+
+    </TableRow>
+
+    <TableRow>
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pick Color"
+            android:onClick="openPickerColor"
+            android:id="@+id/button2" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pick Pattern"
+            android:layout_alignParentRight="true"
+            android:id="@+id/btnPickAvailablePattern"
+            android:layout_column="1" />
+
+    </TableRow>
+
+
+    <TableRow>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Speed"
+            android:layout_alignParentLeft = "true"
+            android:id="@+id/btnSpeedSetting"
+            android:onClick="settingSpeed" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Speed"
+            android:id="@+id/txtSpeed" />
+
+
+
+    </TableRow>
+
+    <TableRow>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Setting Mode"
+            android:id="@+id/btnModeSetting"
+            android:onClick="settingMode" />
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Mode"
+            android:id="@+id/txtMode"
+            android:onClick="settingMode" />
+
+
+    </TableRow>
+
+
+        <Button
+            android:text="Send To Device"
+            android:id="@+id/btnSendToDevice"
+            android:layout_column="1"
+            android:onClick="sendDataToDevice" />
+
+
+        <Button
+            android:text="Scan Device"
+            android:id="@+id/btnScanDevice"
+            android:layout_column="0" />
+
+
+</TableLayout>
