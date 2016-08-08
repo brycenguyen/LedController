@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 
 import no.nordicsemi.android.nrftoolbox.colorpicker.ColorPickerRect;
 import no.nordicsemi.android.nrftoolbox.colorpicker.OnColorChangedListener;
+
 
 import org.w3c.dom.Text;
 
@@ -36,9 +38,6 @@ public class MainActivity extends AppCompatActivity implements  OnColorChangedLi
     private RGBSpeedSetting setSpeedDialog;
     private RGBModeSetting setModeDialog;
     private RGBCommandBuilder cmdBuilder;
-
-    private String strSettingValue = "";
-
     private TextView txtSpeed;
     private TextView txtMode;
 
@@ -46,7 +45,8 @@ public class MainActivity extends AppCompatActivity implements  OnColorChangedLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        table = (TableLayout) findViewById(R.id.table_layout);
+        table = (TableLayout) findViewById(R.id.table_layout_1);
+
         setSpeedDialog = new RGBSpeedSetting(this,this);
         setModeDialog = new RGBModeSetting(this, this);
         picker = new ColorPickerRect(this, this, "COLOR_ADD", Color.BLACK, Color.WHITE);
@@ -56,12 +56,11 @@ public class MainActivity extends AppCompatActivity implements  OnColorChangedLi
         txtSpeed.setText(setSpeedDialog.getCurrentSpeedStr());
         txtMode = (TextView)findViewById(R.id.txtMode);
         txtMode.setText(setModeDialog.getCurrentMode());
-
-
     }
 
     public void openPickerColor(View view) {
-        picker.show();
+        //picker.show();
+        new MyColorPicker(this, this, "COLOR_ADD").show();
     }
     public void settingSpeed(View view) {
         setSpeedDialog.show();
@@ -71,17 +70,17 @@ public class MainActivity extends AppCompatActivity implements  OnColorChangedLi
     }
     public void sendDataToDevice(View view){
         ArrayList<String> strListValue = new ArrayList<String>();
+        ArrayList<Integer> listColor = new ArrayList<Integer>();
         for(TableRowRGB row : list){
-            String str = ((TextView)row.getChildAt(1)).getText().toString();
-            strListValue.add(str);
+            listColor.add(row.getColor());
         }
-        strSettingValue = cmdBuilder.getCommand(strListValue,setSpeedDialog.getCurrentSpeedStr(),setModeDialog.getCurrentMode());
-        Toast.makeText(getApplicationContext(),strSettingValue,Toast.LENGTH_LONG).show();
-    }
 
-    //Call this function
-    public  String getColorSetting(){
-        return strSettingValue;
+        byte[] dataArr;
+        dataArr = cmdBuilder.getCommand(listColor,setSpeedDialog.getChosenItemIndex(),setModeDialog.getChosenItemIndex());
+        Toast.makeText(getApplicationContext(),dataArr.toString(),Toast.LENGTH_LONG).show();
+
+        //TODO : Transmit dataArr command via BLE here,
+
     }
     @Override
     public void colorChanged(String key, int color) {
@@ -95,7 +94,6 @@ public class MainActivity extends AppCompatActivity implements  OnColorChangedLi
     public void speedChanged(String strSpeed) {
         txtSpeed.setText(strSpeed);
     }
-
 
     public void updateSetting() {
         table.removeAllViews();
@@ -115,8 +113,8 @@ public class MainActivity extends AppCompatActivity implements  OnColorChangedLi
         TextView mText;
         Context mContext;
         OnColorChangedListener mListener;
-        int mColor;
         Dialog dialog;
+        int mColor;
 
         public TableRowRGB(Context context, int color) {
             super(context);
@@ -132,7 +130,9 @@ public class MainActivity extends AppCompatActivity implements  OnColorChangedLi
             addView(mText);
             setOnClickListener(this);
         }
-
+        public int getColor(){
+            return mColor;
+        }
         @Override
         public void colorChanged(String key, int color) {
             if ("COLOR_CHANGED".equals(key)) {
@@ -145,7 +145,6 @@ public class MainActivity extends AppCompatActivity implements  OnColorChangedLi
                 addView(mText);
             }
         }
-
         @Override
         public void onClick(View v) {
             dialog = new Dialog(mContext);
@@ -168,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements  OnColorChangedLi
             btnChange.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ColorPickerRect picker = new ColorPickerRect(mContext, mListener, "COLOR_CHANGED", Color.BLACK, Color.WHITE);
+                    MyColorPicker picker = new MyColorPicker(mContext, mListener, "COLOR_CHANGED");
                     picker.show();
                     list.set(list.indexOf(TableRowRGB.this), TableRowRGB.this);
                     updateSetting();

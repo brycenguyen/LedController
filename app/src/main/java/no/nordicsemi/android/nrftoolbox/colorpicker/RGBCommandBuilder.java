@@ -1,5 +1,6 @@
 package no.nordicsemi.android.nrftoolbox.colorpicker;
 
+import android.graphics.Color;
 import android.widget.TableRow;
 import android.widget.TextView;
 
@@ -9,16 +10,33 @@ import java.util.Objects;
 /**
  * Created by Administrator on 31/07/2016.
  */
+/*
+* Command format : 'S' ll ss mm rgb rgb rgb
+* 'S' : Start package , 1 byte
+* ll  : package len   , 1 byte
+* ss  : speed setting , 1 byte
+* mm  : mode setting  , 1 byte
+* rgb : color, red green blue, 3 byte
+* */
 public class RGBCommandBuilder {
-    public String getCommand(ArrayList<String> listRow, String strSpeed, String strMode){
-        String strValue = "";
-        strValue += "Speed: "+strSpeed + "--";
-        strValue += "Mode: "+strMode + "--";
-        strValue += "Value: ";
+    private final int L_START_PACKAGE = 1;
+    private final int L_PACKAGE_LEN = 1;
+    private final int L_SPEED_SETTING = 1;
+    private final int L_MODE_SETTING = 1;
+    private final int L_PREFIX  =   L_START_PACKAGE + L_PACKAGE_LEN + L_SPEED_SETTING + L_MODE_SETTING;
+    public byte[] getCommand(ArrayList<Integer> listColor, int speed, int mode){
+        byte[] commandArr = new byte[listColor.size()*3 + L_PREFIX];
 
-        for(String r : listRow){
-            strValue += " " + r;
+        commandArr[0] = 'S';
+        commandArr[1] = (byte)commandArr.length;
+        commandArr[2] = (byte)speed;
+        commandArr[3] = (byte)mode;
+        int indx = L_PREFIX;
+        for(Integer i : listColor){
+            commandArr[indx++] = (byte)Color.red(i);
+            commandArr[indx++] = (byte)Color.green(i);
+            commandArr[indx++] = (byte)Color.blue(i);
         }
-        return strValue;
+        return commandArr;
     }
 }

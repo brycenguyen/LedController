@@ -16,7 +16,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import no.nordicsemi.android.nrftoolbox.R;
 
 /**
@@ -37,6 +36,7 @@ public class RGBSpeedSetting extends Dialog{
     private OnRGBSpeedListener mListener;
     private ListView mListSpeed;
     private ArrayAdapter adapter = null;
+    private int mChosenItem = 0;
 
     public RGBSpeedSetting(Context context, final OnRGBSpeedListener listener) {
         super(context);
@@ -54,9 +54,13 @@ public class RGBSpeedSetting extends Dialog{
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 RGBSpeedSetting.this.dismiss();
                 mCurrentSpeedStr = ((TextView)view).getText().toString();
+                mChosenItem = position;
                 listener.speedChanged(mCurrentSpeedStr);
             }
         });
+    }
+    public int getChosenItemIndex(){
+        return mChosenItem;
     }
     @Override
     public void show(){
