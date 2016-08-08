@@ -23,19 +23,24 @@
         android:layout_alignParentStart="true" />
     <ScrollView
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:scrollbars="none"
+        android:layout_height="500dp"
+        android:scrollbars="vertical"
         android:layout_weight="1"
         android:id="@+id/scrollView"
         android:fillViewport="false">
 
-        <TableLayout
-            android:layout_width="fill_parent"
-            android:id="@+id/table_layout"
-            android:layout_height="fill_parent">
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
 
-        </TableLayout>
+            <TableLayout
+                android:layout_width="fill_parent"
+                android:id="@+id/table_layout"
+                android:layout_height="match_parent">
+
+            </TableLayout>
+        </HorizontalScrollView>
     </ScrollView>
 
     <TableRow>
@@ -45,14 +50,14 @@
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="New RadioButton"
+                android:text="Customed Pattern"
                 android:id="@+id/radioButton2"
                 android:layout_alignParentRight="true"/>
 
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="New RadioButton"
+                android:text="Default Pattern"
                 android:id="@+id/radioButton"
                 android:checked="false" />
 

@@ -94,7 +94,7 @@ public class FeaturesActivity extends AppCompatActivity {
 		grid.setAdapter(new AppAdapter(this));
 		grid.setEmptyView(findViewById(android.R.id.empty));
 
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		//getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 	}
 
 	@Override

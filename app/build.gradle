@@ -42,4 +42,5 @@ dependencies {
     // compile project(':dfu')
 
     // Also uncomment selected lines in settings.gradle
+    compile 'com.google.android.gms:play-services-appindexing:8.3.0'
 }

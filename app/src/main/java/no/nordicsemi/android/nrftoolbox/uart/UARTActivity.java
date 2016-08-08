@@ -61,6 +61,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.simpleframework.xml.Serializer;
@@ -83,6 +85,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.UUID;
 
@@ -100,45 +103,41 @@ import no.nordicsemi.android.nrftoolbox.utility.FileHelper;
 import no.nordicsemi.android.nrftoolbox.widget.ClosableSpinner;
 import no.nordicsemi.android.nrftoolbox.colorpicker.MainActivity;
 
-public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UARTBinder> implements UARTInterface,
-		UARTNewConfigurationDialogFragment.NewConfigurationDialogListener, UARTConfigurationsAdapter.ActionListener, AdapterView.OnItemSelectedListener,
+public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UARTBinder> implements Serializable, UARTInterface,
+		 UARTConfigurationsAdapter.ActionListener, AdapterView.OnItemSelectedListener,
 		GoogleApiClient.ConnectionCallbacks {
 	private final static String TAG = "UARTActivity";
 
 	private final static String PREFS_BUTTON_ENABLED = "prefs_uart_enabled_";
 	private final static String PREFS_BUTTON_COMMAND = "prefs_uart_command_";
 	private final static String PREFS_BUTTON_ICON = "prefs_uart_icon_";
-	/** This preference keeps the ID of the selected configuration. */
+	/**
+	 * This preference keeps the ID of the selected configuration.
+	 */
 	private final static String PREFS_CONFIGURATION = "configuration_id";
-	/** This preference is set to true when initial data synchronization for wearables has been completed. */
+	/**
+	 * This preference is set to true when initial data synchronization for wearables has been completed.
+	 */
 	private final static String PREFS_WEAR_SYNCED = "prefs_uart_synced";
 	private final static String SIS_EDIT_MODE = "sis_edit_mode";
 
 	private final static int SELECT_FILE_REQ = 2678; // random
 	private final static int PERMISSION_REQ = 24; // random, 8-bit
+	private final static int LEDUSERSETTING = 2;
 
 	UARTConfigurationSynchronizer mWearableSynchronizer;
 
-	/** The current configuration. */
+	/**
+	 * The current configuration.
+	 */
 	private UartConfiguration mConfiguration;
 	private DatabaseHelper mDatabaseHelper;
 	private SharedPreferences mPreferences;
-	private UARTConfigurationsAdapter mConfigurationsAdapter;
+	//private UARTConfigurationsAdapter mConfigurationsAdapter;
 	private ClosableSpinner mConfigurationSpinner;
 	private SlidingPaneLayout mSlider;
 	private UARTService.UARTBinder mServiceBinder;
-	private ConfigurationListener mConfigurationListener;
 	private boolean mEditMode;
-
-	public interface ConfigurationListener {
-		public void onConfigurationModified();
-		public void onConfigurationChanged(final UartConfiguration configuration);
-		public void setEditMode(final boolean editMode);
-	}
-
-	public void setConfigurationListener(final ConfigurationListener listener) {
-		mConfigurationListener = listener;
-	}
 
 	@Override
 	protected Class<? extends BleProfileService> getServiceClass() {
@@ -174,8 +173,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	protected void onInitialize(final Bundle savedInstanceState) {
 		mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		mDatabaseHelper = new DatabaseHelper(this);
-		ensureFirstConfiguration(mDatabaseHelper);
-		mConfigurationsAdapter = new UARTConfigurationsAdapter(this, this, mDatabaseHelper.getConfigurationsNames());
+		//mConfigurationsAdapter = new UARTConfigurationsAdapter(this, this, mDatabaseHelper.getConfigurationsNames());
 
 		// Initialize Wearable synchronizer
 		mWearableSynchronizer = UARTConfigurationSynchronizer.from(this, this);
@@ -215,6 +213,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	/**
 	 * Method called then Google API client connection was suspended.
+	 *
 	 * @param cause the cause of suspension
 	 */
 	@Override
@@ -246,16 +245,21 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				}
 			});
 		}
+	/*	String device=getDeviceName();
+		if(device!=null) {
+			String RGBsetting = getIntent().getStringExtra("RGB setting");
+			send(RGBsetting);
+		}*/
 	}
 
 	@Override
 	protected void onViewCreated(final Bundle savedInstanceState) {
-		getSupportActionBar().setDisplayShowTitleEnabled(false);
+//		getSupportActionBar().setDisplayShowTitleEnabled(false);
 
 		final ClosableSpinner configurationSpinner = mConfigurationSpinner = (ClosableSpinner) findViewById(R.id.toolbar_spinner);
-		configurationSpinner.setOnItemSelectedListener(this);
-		configurationSpinner.setAdapter(mConfigurationsAdapter);
-		configurationSpinner.setSelection(mConfigurationsAdapter.getItemPosition(mPreferences.getLong(PREFS_CONFIGURATION, 0)));
+		//configurationSpinner.setOnItemSelectedListener(this);
+		//configurationSpinner.setAdapter(mConfigurationsAdapter);
+		//configurationSpinner.setSelection(mConfigurationsAdapter.getItemPosition(mPreferences.getLong(PREFS_CONFIGURATION, 0)));
 	}
 
 	@Override
@@ -263,7 +267,6 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 		super.onRestoreInstanceState(savedInstanceState);
 
 		mEditMode = savedInstanceState.getBoolean(SIS_EDIT_MODE);
-		setEditMode(mEditMode, false);
 	}
 
 	@Override
@@ -309,11 +312,6 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			mServiceBinder.send(text);
 	}
 
-	public void setEditMode(final boolean editMode) {
-		setEditMode(editMode, true);
-		invalidateOptionsMenu();
-	}
-
 	@Override
 	public void onBackPressed() {
 		if (mSlider != null && mSlider.isOpen()) {
@@ -322,7 +320,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 		}
 		if (mEditMode) {
 			final UARTControlFragment fragment = (UARTControlFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_control);
-			fragment.setEditMode(false);
+			//fragment.setEditMode(false);
 			return;
 		}
 		super.onBackPressed();
@@ -342,9 +340,6 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	protected boolean onOptionsItemSelected(int itemId) {
 		final String name = mConfiguration.getName();
 		switch (itemId) {
-			case R.id.action_configure:
-				setEditMode(!mEditMode);
-				return true;
 			case R.id.action_show_log:
 				mSlider.openPane();
 				return true;
@@ -363,14 +358,6 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				}
 				return true;
 			}
-			case R.id.action_export: {
-				if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-					exportConfiguration();
-				} else {
-					ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, PERMISSION_REQ);
-				}
-				return true;
-			}
 			case R.id.action_rename: {
 				final DialogFragment fragment = UARTNewConfigurationDialogFragment.getInstance(name, false);
 				fragment.show(getSupportFragmentManager(), null);
@@ -383,28 +370,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				// onNewConfiguration(name, true) will be called when user press OK
 				return true;
 			}
-			case R.id.action_remove: {
-				mDatabaseHelper.removeDeletedServerConfigurations(); // just to be sure nothing has left
-				final UartConfiguration removedConfiguration = mConfiguration;
-				final long id = mDatabaseHelper.deleteConfiguration(name);
-				if (id >= 0)
-					mWearableSynchronizer.onConfigurationDeleted(id);
-				refreshConfigurations();
-
-				final Snackbar snackbar = Snackbar.make(mSlider, R.string.uart_configuration_deleted, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_undo, new View.OnClickListener() {
-					@Override
-					public void onClick(final View v) {
-						final long id = mDatabaseHelper.restoreDeletedServerConfiguration(name);
-						if (id >= 0)
-							mWearableSynchronizer.onConfigurationAddedOrEdited(id, removedConfiguration);
-						refreshConfigurations();
 					}
-				});
-				snackbar.setDuration(5000); // This is not an error
-				snackbar.show();
-				return true;
-			}
-		}
 		return false;
 	}
 
@@ -415,7 +381,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			case PERMISSION_REQ: {
 				if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 					// We have been granted the Manifest.permission.WRITE_EXTERNAL_STORAGE permission. Now we may proceed with exporting.
-					exportConfiguration();
+					//exportConfiguration();
 				} else {
 					Toast.makeText(this, R.string.no_required_permission, Toast.LENGTH_SHORT).show();
 				}
@@ -432,7 +398,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 				final Format format = new Format(new HyphenStyle());
 				final Serializer serializer = new Persister(format);
 				mConfiguration = serializer.read(UartConfiguration.class, xml);
-				mConfigurationListener.onConfigurationChanged(mConfiguration);
+				//mConfigurationListener.onConfigurationChanged(mConfiguration);
 			} catch (final Exception e) {
 				Log.e(TAG, "Selecting configuration failed", e);
 
@@ -465,8 +431,10 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 	public void onEditPatternClick(final View view)
 	{
 		final Intent intent = new Intent(UARTActivity.this, MainActivity.class);//huy
-		startActivity(intent);
+		startActivityForResult(intent, LEDUSERSETTING);// Activity is started with requestCode 2
+		//send("Start editing pattern");
 	}
+
 	@Override
 	public void onNewConfigurationClick() {
 		// No item has been selected. We must close the spinner manually.
@@ -490,6 +458,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 		if (intent.resolveActivity(getPackageManager()) != null) {
 			// file browser has been found on the device
 			startActivityForResult(intent, SELECT_FILE_REQ);
+
 		} else {
 			// there is no any file browser app, let's try to download one
 			final View customView = getLayoutInflater().inflate(R.layout.app_file_browser, null);
@@ -537,7 +506,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 					final String path = uri.getPath();
 					try {
 						final FileInputStream fis = new FileInputStream(path);
-						loadConfiguration(fis);
+						//loadConfiguration(fis);
 					} catch (final FileNotFoundException e) {
 						Toast.makeText(this, R.string.uart_configuration_load_error, Toast.LENGTH_LONG).show();
 					}
@@ -552,309 +521,43 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 					try {
 						final InputStream is = getContentResolver().openInputStream(u);
-						loadConfiguration(is);
+						//loadConfiguration(is);
 					} catch (final FileNotFoundException e) {
 						Toast.makeText(this, R.string.uart_configuration_load_error, Toast.LENGTH_LONG).show();
 					}
 				}
 				break;
+
 			}
-		}
-	}
+			case LEDUSERSETTING: {
+				byte[] LedSetting = data.getByteArrayExtra("LED SETTING");
+				int[] ArrayInt = new int[LedSetting.length];
+				int i =0;
+				for(byte b : LedSetting){
+					ArrayInt[i++] = (int)b;
 
-	public void onCommandChanged(final int index, final String message, final boolean active, final int iconIndex) {
-		final Command command = mConfiguration.getCommands()[index];
-
-		command.setCommand(message);
-		command.setActive(active);
-		command.setIconIndex(iconIndex);
-		mConfigurationListener.onConfigurationModified();
-		saveConfiguration();
-	}
-
-	@Override
-	public void onNewConfiguration(final String name, final boolean duplicate) {
-		final boolean exists = mDatabaseHelper.configurationExists(name);
-		if (exists) {
-			Toast.makeText(this, R.string.uart_configuration_name_already_taken, Toast.LENGTH_LONG).show();
-			return;
-		}
-
-		UartConfiguration configuration = mConfiguration;
-		if (!duplicate)
-			configuration = new UartConfiguration();
-		configuration.setName(name);
-
-		try {
-			final Format format = new Format(new HyphenStyle());
-			final Strategy strategy = new VisitorStrategy(new CommentVisitor());
-			final Serializer serializer = new Persister(strategy, format);
-			final StringWriter writer = new StringWriter();
-			serializer.write(configuration, writer);
-			final String xml = writer.toString();
-
-			final long id = mDatabaseHelper.addConfiguration(name, xml);
-			mWearableSynchronizer.onConfigurationAddedOrEdited(id, configuration);
-			refreshConfigurations();
-			selectConfiguration(mConfigurationsAdapter.getItemPosition(id));
-		} catch (final Exception e) {
-			Log.e(TAG, "Error while creating a new configuration", e);
-		}
-	}
-
-	@Override
-	public void onRenameConfiguration(final String newName) {
-		final boolean exists = mDatabaseHelper.configurationExists(newName);
-		if (exists) {
-			Toast.makeText(this, R.string.uart_configuration_name_already_taken, Toast.LENGTH_LONG).show();
-			return;
-		}
-
-		final String oldName = mConfiguration.getName();
-		mConfiguration.setName(newName);
-
-		try {
-			final Format format = new Format(new HyphenStyle());
-			final Strategy strategy = new VisitorStrategy(new CommentVisitor());
-			final Serializer serializer = new Persister(strategy, format);
-			final StringWriter writer = new StringWriter();
-			serializer.write(mConfiguration, writer);
-			final String xml = writer.toString();
-
-			mDatabaseHelper.renameConfiguration(oldName, newName, xml);
-			mWearableSynchronizer.onConfigurationAddedOrEdited(mPreferences.getLong(PREFS_CONFIGURATION, 0), mConfiguration);
-			refreshConfigurations();
-		} catch (final Exception e) {
-			Log.e(TAG, "Error while renaming configuration", e);
-		}
-	}
-
-	private void refreshConfigurations() {
-		mConfigurationsAdapter.swapCursor(mDatabaseHelper.getConfigurationsNames());
-		mConfigurationsAdapter.notifyDataSetChanged();
-		invalidateOptionsMenu();
-	}
-
-	private void selectConfiguration(final int position) {
-		mConfigurationSpinner.setSelection(position);
-	}
-
-	/**
-	 * Updates the ActionBar background color depending on whether we are in edit mode or not.
-	 * 
-	 * @param editMode
-	 *            <code>true</code> to show edit mode, <code>false</code> otherwise
-	 * @param change
-	 *            if <code>true</code> the background will change with animation, otherwise immediately
-	 */
-	@SuppressLint("NewApi")
-	private void setEditMode(final boolean editMode, final boolean change) {
-		mEditMode = editMode;
-		mConfigurationListener.setEditMode(editMode);
-		if (!change) {
-			final ColorDrawable color = new ColorDrawable();
-			int darkColor = 0;
-			if (editMode) {
-				color.setColor(getResources().getColor(R.color.orange));
-				darkColor = getResources().getColor(R.color.dark_orange);
-			} else {
-				color.setColor(getResources().getColor(R.color.actionBarColor));
-				darkColor = getResources().getColor(R.color.actionBarColorDark);
-			}
-			getSupportActionBar().setBackgroundDrawable(color);
-
-			// Since Lollipop the status bar color may also be changed
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-				getWindow().setStatusBarColor(darkColor);
-		} else {
-			final TransitionDrawable transition = (TransitionDrawable) getResources().getDrawable(
-					editMode ? R.drawable.start_edit_mode : R.drawable.stop_edit_mode);
-			transition.setCrossFadeEnabled(true);
-			getSupportActionBar().setBackgroundDrawable(transition);
-			transition.startTransition(200);
-
-			// Since Lollipop the status bar color may also be changed
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-				final int colorFrom = getResources().getColor(editMode ? R.color.actionBarColorDark : R.color.dark_orange);
-				final int colorTo = getResources().getColor(!editMode ? R.color.actionBarColorDark : R.color.dark_orange);
-
-				final ValueAnimator anim = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-				anim.setDuration(200);
-				anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-					@Override
-					public void onAnimationUpdate(final ValueAnimator animation) {
-						getWindow().setStatusBarColor((Integer) animation.getAnimatedValue());
-					}
-				});
-				anim.start();
-			}
-
-			if (mSlider != null && editMode) {
-				mSlider.closePane();
-			}
-		}
-	}
-
-	/**
-	 * Saves the given configuration in the database.
-	 */
-	private void saveConfiguration() {
-		final UartConfiguration configuration = mConfiguration;
-		try {
-			final Format format = new Format(new HyphenStyle());
-			final Strategy strategy = new VisitorStrategy(new CommentVisitor());
-			final Serializer serializer = new Persister(strategy, format);
-			final StringWriter writer = new StringWriter();
-			serializer.write(configuration, writer);
-			final String xml = writer.toString();
-
-			mDatabaseHelper.updateConfiguration(configuration.getName(), xml);
-			mWearableSynchronizer.onConfigurationAddedOrEdited(mPreferences.getLong(PREFS_CONFIGURATION, 0), configuration);
-		} catch (final Exception e) {
-			Log.e(TAG, "Error while creating a new configuration", e);
-		}
-	}
-
-	/**
-	 * Loads the configuration from the given input stream.
-	 * @param is the input stream
-	 */
-	private void loadConfiguration(final InputStream is) {
-		try {
-			final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-			final StringBuilder builder = new StringBuilder();
-			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-				builder.append(line).append("\n");
-			}
-			final String xml = builder.toString();
-
-			final Format format = new Format(new HyphenStyle());
-			final Serializer serializer = new Persister(format);
-			final UartConfiguration configuration = serializer.read(UartConfiguration.class, xml);
-
-			final String name = configuration.getName();
-			if (!mDatabaseHelper.configurationExists(name)) {
-				final long id = mDatabaseHelper.addConfiguration(name, xml);
-				mWearableSynchronizer.onConfigurationAddedOrEdited(id, configuration);
-				refreshConfigurations();
-				new Handler().post(new Runnable() {
-					@Override
-					public void run() {
-						selectConfiguration(mConfigurationsAdapter.getItemPosition(id));
-					}
-				});
-			} else {
-				Toast.makeText(this, R.string.uart_configuration_name_already_taken, Toast.LENGTH_LONG).show();
-			}
-		} catch (final Exception e) {
-			Log.e(TAG, "Loading configuration failed", e);
-
-			String message;
-			if (e.getLocalizedMessage() != null)
-				message = e.getLocalizedMessage();
-			else if (e.getCause() != null && e.getCause().getLocalizedMessage() != null)
-				message = e.getCause().getLocalizedMessage();
-			else
-				message = "Unknown error";
-			final String msg = message;
-			Snackbar.make(mSlider, R.string.uart_configuration_loading_failed, Snackbar.LENGTH_INDEFINITE).setAction(R.string.uart_action_details, new View.OnClickListener() {
-				@Override
-				public void onClick(final View v) {
-					new AlertDialog.Builder(UARTActivity.this).setMessage(msg).setTitle(R.string.uart_action_details).setPositiveButton(R.string.ok, null).show();
 				}
-			}).show();
-		}
-	}
-
-	private void exportConfiguration() {
-		// TODO this may not work if the SD card is not available. (Lenovo A806, email from 11.03.2015)
-		final File folder = new File(Environment.getExternalStorageDirectory(), FileHelper.NORDIC_FOLDER);
-		if (!folder.exists())
-			folder.mkdir();
-		final File serverFolder = new File(folder, FileHelper.UART_FOLDER);
-		if (!serverFolder.exists())
-			serverFolder.mkdir();
-
-		final String fileName = mConfiguration.getName() + ".xml";
-		final File file = new File(serverFolder, fileName);
-		try {
-			file.createNewFile();
-			final FileOutputStream fos = new FileOutputStream(file);
-			final OutputStreamWriter writer = new OutputStreamWriter(fos);
-			writer.append(mDatabaseHelper.getConfiguration(mConfigurationSpinner.getSelectedItemId()));
-			writer.close();
-
-			// Notify user about the file
-			final Intent intent = new Intent(Intent.ACTION_VIEW);
-			intent.setDataAndType(Uri.fromFile(file), "text/xml");
-			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			final PendingIntent pendingIntent = PendingIntent.getActivity(this, 420, intent, 0);
-			final Notification notification = new NotificationCompat.Builder(this).setContentIntent(pendingIntent).setContentTitle(fileName).setContentText(getText(R.string.uart_configuration_export_succeeded))
-					.setAutoCancel(true).setShowWhen(true).setTicker(getText(R.string.uart_configuration_export_succeeded_ticker)).setSmallIcon(android.R.drawable.stat_notify_sdcard).build();
-			final NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-			nm.notify(fileName, 823, notification);
-		} catch (final Exception e) {
-			Log.e(TAG, "Error while exporting configuration", e);
-			Toast.makeText(this, R.string.uart_configuration_save_error, Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	/**
-	 * Converts the old configuration, stored in preferences, into the first XML configuration and saves it to the database.
-	 * If there is already any configuration in the database this method does nothing.
-	 */
-	private void ensureFirstConfiguration(final DatabaseHelper mDatabaseHelper) {
-		// This method ensures that the "old", single configuration has been saved to the database.
-		if (mDatabaseHelper.getConfigurationsCount() == 0) {
-			final UartConfiguration configuration = new UartConfiguration();
-			configuration.setName("First configuration");
-			final Command[] commands = configuration.getCommands();
-
-			for (int i = 0; i < 9; ++i) {
-				final String cmd = mPreferences.getString(PREFS_BUTTON_COMMAND + i, null);
-				if (cmd != null) {
-					final Command command = new Command();
-					command.setCommand(cmd);
-					command.setActive(mPreferences.getBoolean(PREFS_BUTTON_ENABLED + i, false));
-					command.setIconIndex(mPreferences.getInt(PREFS_BUTTON_ICON + i, 0));
-					commands[i] = command;
-				}
-			}
-
-			try {
-				final Format format = new Format(new HyphenStyle());
-				final Strategy strategy = new VisitorStrategy(new CommentVisitor());
-				final Serializer serializer = new Persister(strategy, format);
-				final StringWriter writer = new StringWriter();
-				serializer.write(configuration, writer);
-				final String xml = writer.toString();
-
-				mDatabaseHelper.addConfiguration(configuration.getName(), xml);
-			} catch (final Exception e) {
-				Log.e(TAG, "Error while creating default configuration", e);
+				//int[] LedSetting = data.getIntArrayExtra("LED SETTING");
+				String LedString1=ArrayInt.toString().substring(1,10);
+				this.send(LedString1);
+				//String LedString2=LedSetting.toString().substring(10,LedSetting.length+1);
+				//this.send(LedString2);
+				String DoneSetting="Pattern đã được sync với Device";
+				Toast.makeText(getApplicationContext(), DoneSetting, Toast.LENGTH_LONG).show();
+				break;
 			}
 		}
 	}
 
-	/**
-	 * The comment visitor will add comments to the XML during saving.
-	 */
-	private class CommentVisitor implements Visitor {
-		@Override
-		public void read(final Type type, final NodeMap<InputNode> node) throws Exception {
-			// do nothing
-		}
+	/*	protected void onResume()
+		{
+        String device=getDeviceName();
+            if(device!=null)
+            {
+                String RGBsetting = getIntent().getStringExtra("RGB setting");
+                send(RGBsetting);
+    }
+        }
+*/
 
-		@Override
-		public void write(final Type type, final NodeMap<OutputNode> node) throws Exception {
-			if (type.getType().equals(Command[].class)) {
-				OutputNode element = node.getNode();
-
-				StringBuilder builder = new StringBuilder("A configuration must have 9 commands, one for each button.\n        Possible icons are:");
-				for (Command.Icon icon : Command.Icon.values())
-					builder.append("\n          - ").append(icon.toString());
-				element.setComment(builder.toString());
-			}
-		}
-	}
 }

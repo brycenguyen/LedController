@@ -36,6 +36,7 @@ public class RGBModeSetting extends Dialog{
 
     private ListView listViewMode;
     private String mCurrentModeString = mListContent.get(0);
+    private int mChosenItem = 0;
 
     public RGBModeSetting(Context context, OnRGBModeListener listener) {
         super(context);
@@ -53,10 +54,14 @@ public class RGBModeSetting extends Dialog{
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mCurrentModeString = ((TextView)view).getText().toString();
                 mListener.modeChanged(mCurrentModeString);
+                mChosenItem = position;
                 RGBModeSetting.this.dismiss();
 
             }
         });
+    }
+    public int getChosenItemIndex(){
+        return mChosenItem;
     }
     public void show(){
         super.show();

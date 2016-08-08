@@ -216,8 +216,8 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 		onInitialize(savedInstanceState);
 		onCreateView(savedInstanceState);
 
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        setSupportActionBar(toolbar);
+     //   final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+//        setSupportActionBar(toolbar);
 
 		setUpView();
 		onViewCreated(savedInstanceState);
@@ -258,7 +258,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 			mService = null;
 
 			Logger.d(mLogSession, "Activity unbinded from the service");
-			onServiceUnbinded();
+			//onServiceUnbinded();//huy
 			mDeviceName = null;
 			mLogSession = null;
 		} catch (final IllegalArgumentException e) {
@@ -342,7 +342,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 	 */
 	protected final void setUpView() {
 		// set GUI
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		//getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mConnectButton = (Button) findViewById(R.id.action_connect);
 		mDeviceNameView = (TextView) findViewById(R.id.device_name);
 		mBatteryLevelView = (TextView) findViewById(R.id.battery);

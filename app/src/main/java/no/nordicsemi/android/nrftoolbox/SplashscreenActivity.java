@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 
+import no.nordicsemi.android.nrftoolbox.colorpicker.MainActivity;
 import no.nordicsemi.android.nrftoolbox.uart.UARTActivity;
 
 public class SplashscreenActivity extends Activity {
@@ -42,6 +43,7 @@ public class SplashscreenActivity extends Activity {
 			@Override
 			public void run() {
 				//final Intent intent = new Intent(SplashscreenActivity.this, FeaturesActivity.class);
+				//final Intent intent = new Intent(SplashscreenActivity.this, MainActivity.class);//huy
 				final Intent intent = new Intent(SplashscreenActivity.this, UARTActivity.class);//huy
 				intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 				startActivity(intent);

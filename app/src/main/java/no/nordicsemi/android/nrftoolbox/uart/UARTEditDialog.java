@@ -126,7 +126,7 @@ public class UARTEditDialog extends DialogFragment implements View.OnClickListen
 
 		dismiss();
 		final UARTActivity parent = (UARTActivity) getActivity();
-		parent.onCommandChanged(index, command, active, mActiveIcon);
+		//parent.onCommandChanged(index, command, active, mActiveIcon);
 	}
 
 	@Override

@@ -54,29 +54,6 @@
 		android:textAllCaps="true"
 		android:textAppearance="?android:attr/textAppearanceLarge"/>
 
-	<LinearLayout
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:layout_marginLeft="@dimen/feature_horizontal_margin"
-		android:layout_marginRight="@dimen/feature_horizontal_margin"
-		android:gravity="center"
-		android:orientation="vertical"
-		android:layout_above="@+id/action_connect"
-		android:layout_below="@+id/button">
-
-		<GridView
-			android:id="@+id/grid"
-			android:layout_width="@dimen/feature_uart_buttons_pane_width"
-			android:layout_height="@dimen/feature_uart_buttons_pane_height"
-			android:layout_margin="4dp"
-			android:gravity="center"
-			android:horizontalSpacing="4dp"
-			android:numColumns="3"
-			android:verticalSpacing="4dp"
-			tools:listitem="@layout/feature_uart_button"/>
-
-	</LinearLayout>
-
 	<Button
 		android:id="@+id/action_connect"
 		style="@style/Widget.Connect"
@@ -109,11 +86,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 		android:onClick="onEditPatternClick"
-        android:text="EDIT PATTERN"
-		android:layout_below="@+id/device_name"
-		android:layout_alignStart="@+id/action_connect"
-		android:layout_marginTop="34dp"
 		android:nestedScrollingEnabled="true"
-		android:singleLine="true" />
+		android:singleLine="true"
+		android:text="@string/edit_pattern"
+		android:layout_below="@+id/device_name"
+		android:layout_centerHorizontal="true"
+		android:layout_marginTop="32dp" />
 
 </RelativeLayout>

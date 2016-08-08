@@ -23,7 +23,9 @@
 package no.nordicsemi.android.nrftoolbox.uart;
 
 
-public interface UARTInterface {
+import java.io.Serializable;
+
+public interface UARTInterface{
 
 	public void send(final String text);
 }

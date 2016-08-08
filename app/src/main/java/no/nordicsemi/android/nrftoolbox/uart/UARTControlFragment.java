@@ -42,7 +42,7 @@ import no.nordicsemi.android.nrftoolbox.R;
 import no.nordicsemi.android.nrftoolbox.uart.domain.Command;
 import no.nordicsemi.android.nrftoolbox.uart.domain.UartConfiguration;
 
-public class UARTControlFragment extends Fragment implements GridView.OnItemClickListener, UARTActivity.ConfigurationListener {
+public class UARTControlFragment extends Fragment implements GridView.OnItemClickListener{
 	private final static String TAG = "UARTControlFragment";
 	private final static String SIS_EDIT_MODE = "sis_edit_mode";
 
@@ -55,7 +55,7 @@ public class UARTControlFragment extends Fragment implements GridView.OnItemClic
 		super.onAttach(context);
 
 		try {
-			((UARTActivity)context).setConfigurationListener(this);
+			//((UARTActivity)context).setConfigurationListener(this);
 		} catch (final ClassCastException e) {
 			Log.e(TAG, "The parent activity must implement EditModeListener");
 		}
@@ -73,7 +73,7 @@ public class UARTControlFragment extends Fragment implements GridView.OnItemClic
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		((UARTActivity)getActivity()).setConfigurationListener(null);
+		//((UARTActivity)getActivity()).setConfigurationListener(null);
 	}
 
 	@Override
@@ -85,10 +85,10 @@ public class UARTControlFragment extends Fragment implements GridView.OnItemClic
 	public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
 		final View view = inflater.inflate(R.layout.fragment_feature_uart_control, container, false);
 
-		final GridView grid = (GridView) view.findViewById(R.id.grid);
-		grid.setAdapter(mAdapter = new UARTButtonAdapter(mConfiguration));
-		grid.setOnItemClickListener(this);
-		mAdapter.setEditMode(mEditMode);
+		//final GridView grid = (GridView) view.findViewById(R.id.grid);
+		//grid.setAdapter(mAdapter = new UARTButtonAdapter(mConfiguration));
+		//grid.setOnItemClickListener(this);
+		//mAdapter.setEditMode(mEditMode);
 
 		return view;
 	}
@@ -108,20 +108,19 @@ public class UARTControlFragment extends Fragment implements GridView.OnItemClic
 		}
 	}
 
-	@Override
-	public void onConfigurationModified() {
-		mAdapter.notifyDataSetChanged();
-	}
 
-	@Override
-	public void onConfigurationChanged(final UartConfiguration configuration) {
+	/*public void onConfigurationModified() {
+		mAdapter.notifyDataSetChanged();
+	}*/
+
+
+	/*public void onConfigurationChanged(final UartConfiguration configuration) {
 		mConfiguration = configuration;
 		mAdapter.setConfiguration(configuration);
-	}
+	}*/
 
-	@Override
-	public void setEditMode(final boolean editMode) {
+	/*public void setEditMode(final boolean editMode) {
 		mEditMode = editMode;
 		mAdapter.setEditMode(mEditMode);
-	}
+	}*/
 }

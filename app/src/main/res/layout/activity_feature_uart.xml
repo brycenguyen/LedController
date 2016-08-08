@@ -26,9 +26,9 @@
 	android:orientation="vertical"
 	tools:context=".UARTActivity">
 
-	<include
+<!--	<include
 		android:id="@+id/toolbar_actionbar"
-		layout="@layout/toolbar_w_spinner"/>
+		layout="@layout/toolbar_w_spinner"/>-->
 
 	<FrameLayout
 		style="@style/HeaderShadow"
