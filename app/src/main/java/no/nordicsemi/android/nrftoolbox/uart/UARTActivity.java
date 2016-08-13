@@ -21,7 +21,9 @@
  */
 
 package no.nordicsemi.android.nrftoolbox.uart;
-
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import android.Manifest;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
@@ -166,7 +168,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 
 	@Override
 	protected void onServiceUnbinded() {
-		mServiceBinder = null;
+		//mServiceBinder = null;
 	}
 
 	@Override
@@ -531,15 +533,26 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 			}
 			case LEDUSERSETTING: {
 				byte[] LedSetting = data.getByteArrayExtra("LED SETTING");
-				int[] ArrayInt = new int[LedSetting.length];
-				int i =0;
-				for(byte b : LedSetting){
-					ArrayInt[i++] = (int)b;
-
+				//int[] ArrayInt = new int[LedSetting.length];
+				String test1="";
+				try{
+				test1=new String(LedSetting,"US-ASCII");
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
 				}
-				//int[] LedSetting = data.getIntArrayExtra("LED SETTING");
-				String LedString1=ArrayInt.toString().substring(1,10);
+				String LedString1=test1.substring(0,2);
+				LedString1=LedString1+"abcdefgh";
+				//this.send("abcdefghik");
+
 				this.send(LedString1);
+				//String LedString2=test1.substring(10);
+				while(UARTService.returnSendData()==0);
+				String LedString2="123456789";
+				this.send(LedString2);
+				Toast.makeText(getApplicationContext(), test1, Toast.LENGTH_LONG).show();
+				//int[] LedSetting = data.getIntArrayExtra("LED SETTING");
+				//String LedString1=Arrays.toString(ArrayInt).substring(1,10);
+				//this.send(LedString1);
 				//String LedString2=LedSetting.toString().substring(10,LedSetting.length+1);
 				//this.send(LedString2);
 				String DoneSetting="Pattern đã được sync với Device";

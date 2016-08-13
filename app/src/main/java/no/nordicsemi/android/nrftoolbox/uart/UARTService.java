@@ -71,16 +71,21 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 	private final static int NOTIFICATION_ID = 349; // random
 	private final static int OPEN_ACTIVITY_REQ = 67; // random
 	private final static int DISCONNECT_REQ = 97; // random
-
+	private static int finishSendData=0;
 	private GoogleApiClient mGoogleApiClient;
 	private UARTManager mManager;
 
 	private final LocalBinder mBinder = new UARTBinder();
-
+	 public static int returnSendData()
+	 {
+		  return finishSendData;
+	 }
 	public class UARTBinder extends LocalBinder implements UARTInterface {
 		@Override
 		public void send(final String text) {
+			finishSendData=0;
 			mManager.send(text);
+
 		}
 
 		@Override
@@ -192,6 +197,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 		final Intent broadcast = new Intent(BROADCAST_UART_TX);
 		broadcast.putExtra(EXTRA_DATA, data);
 		LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
+		finishSendData=1;
 	}
 
 	/**
